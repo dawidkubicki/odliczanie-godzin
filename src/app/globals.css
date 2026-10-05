@@ -237,3 +237,22 @@ body {
     opacity: 0.6;
   }
 }
+
+/*
+ * Touch devices: iOS Safari zooms into any focused field below 16px.
+ * Unlayered, so it beats the text-[15px] utilities on fields.
+ */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* iOS Safari centres datetime values and collapses empty date fields */
+input[type="date"]::-webkit-date-and-time-value,
+input[type="datetime-local"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.45em;
+}
