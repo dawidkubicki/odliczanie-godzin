@@ -6,7 +6,10 @@
  * remove an hour — the same behaviour as the original desktop tool.
  */
 
+/** Number of ranges shown by default; users can add or remove rows. */
 export const RANGE_COUNT = 6;
+export const MIN_RANGES = 1;
+export const MAX_RANGES = 20;
 
 export type TimeRange = {
   id: string;

@@ -11,8 +11,13 @@ type RangeRowProps = {
   range: TimeRange;
   status: RangeStatus;
   minutes: number;
+  /** False when this is the only row left — the button then just clears it. */
+  canRemove: boolean;
+  /** Animate in (rows added by the user, not the initial ones). */
+  isNew?: boolean;
   onChange: (id: string, patch: Partial<TimeRange>) => void;
   onClear: (id: string) => void;
+  onRemove: (id: string) => void;
 };
 
 function StatusText({
@@ -96,37 +101,50 @@ export const RangeRow = memo(function RangeRow({
   range,
   status,
   minutes,
+  canRemove,
+  isNew,
   onChange,
   onClear,
+  onRemove,
 }: RangeRowProps) {
   const n = index + 1;
   const hasValues = range.start !== "" || range.end !== "";
   const reversed = status === "reversed";
+  // With several rows the button removes the row; on the last one it only clears it.
+  const showButton = canRemove || hasValues;
+  const buttonLabel = canRemove ? `Usuń przedział ${n}` : `Wyczyść przedział ${n}`;
 
   return (
-    <div className="px-4 py-4 sm:px-5" role="group" aria-labelledby={`${range.id}-title`}>
+    <div
+      className={`px-4 py-4 sm:px-5 ${isNew ? "animate-fade-in" : ""}`}
+      role="group"
+      aria-labelledby={`${range.id}-title`}
+    >
       <div className="flex min-h-[28px] items-center gap-3">
-        <h3
-          id={`${range.id}-title`}
-          className={`shrink-0 text-[15px] font-semibold tracking-[-0.01em] transition-colors ${
-            range.active ? "text-label" : "text-tertiary"
-          }`}
-        >
-          Przedział {n}
-        </h3>
-        <p className="min-w-0 flex-1 truncate text-right text-[13px] tabular-nums">
-          <StatusText range={range} status={status} minutes={minutes} />
-        </p>
+        {/* Narrow screens: duration sits under the title like an iOS subtitle */}
+        <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-center sm:gap-3">
+          <h3
+            id={`${range.id}-title`}
+            className={`shrink-0 text-[15px] font-semibold tracking-[-0.01em] transition-colors ${
+              range.active ? "text-label" : "text-tertiary"
+            }`}
+          >
+            Przedział {n}
+          </h3>
+          <p className="min-w-0 flex-1 truncate text-[13px] tabular-nums sm:text-right">
+            <StatusText range={range} status={status} minutes={minutes} />
+          </p>
+        </div>
         <button
           type="button"
-          onClick={() => onClear(range.id)}
-          aria-label={`Wyczyść przedział ${n}`}
-          title="Wyczyść"
-          tabIndex={hasValues ? 0 : -1}
-          aria-hidden={!hasValues || undefined}
-          className={`inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-field text-secondary transition-[opacity,transform,background-color,color] duration-200 hover:bg-field-hover hover:text-label active:scale-90 ${
-            hasValues ? "opacity-100" : "pointer-events-none scale-75 opacity-0"
-          }`}
+          onClick={() => (canRemove ? onRemove(range.id) : onClear(range.id))}
+          aria-label={buttonLabel}
+          title={canRemove ? "Usuń przedział" : "Wyczyść"}
+          tabIndex={showButton ? 0 : -1}
+          aria-hidden={!showButton || undefined}
+          className={`inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-field text-secondary transition-[opacity,transform,background-color,color] duration-200 hover:bg-field-hover active:scale-90 ${
+            canRemove ? "hover:text-danger" : "hover:text-label"
+          } ${showButton ? "opacity-100" : "pointer-events-none scale-75 opacity-0"}`}
         >
           <XmarkIcon size={12} strokeWidth={2.25} />
         </button>

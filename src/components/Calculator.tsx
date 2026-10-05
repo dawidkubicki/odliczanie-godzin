@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
-import { calculate, computeAmount, type TimeRange } from "@/lib/time";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { calculate, computeAmount, MAX_RANGES, MIN_RANGES, type TimeRange } from "@/lib/time";
 import { parseDecimal } from "@/lib/format";
 import {
+  emptyRange,
   emptyRanges,
   INITIAL_STATE,
+  nextRangeId,
   rateToInput,
   sanitizeState,
   STORAGE_KEY,
@@ -25,6 +27,7 @@ import { Toast, useToast } from "./Toast";
 
 function isPristine(s: AppState): boolean {
   return (
+    s.ranges.length === INITIAL_STATE.ranges.length &&
     s.ranges.every((r) => !r.start && !r.end && r.active) &&
     s.currency === INITIAL_STATE.currency &&
     s.rateMode === INITIAL_STATE.rateMode &&
@@ -39,6 +42,18 @@ export function Calculator() {
   const nbp = useNbpRate();
   const { fetchRate, setError: setRateError, clearError, cancel } = nbp;
   const { toast, show: showToast, dismiss: dismissToast } = useToast();
+  // Rows added by the user in this session (animated in, focused once mounted)
+  const [newIds, setNewIds] = useState<ReadonlySet<string>>(() => new Set());
+  const focusIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const id = focusIdRef.current;
+    if (!id) return;
+    focusIdRef.current = null;
+    const input = document.getElementById(`${id}-start`);
+    input?.focus({ preventScroll: true });
+    input?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [state.ranges]);
 
   // ---- derived values -------------------------------------------------------
   const result = useMemo(() => calculate(state.ranges), [state.ranges]);
@@ -101,6 +116,41 @@ export function Calculator() {
   const clearRange = useCallback(
     (id: string) => updateRange(id, { start: "", end: "" }),
     [updateRange],
+  );
+
+  const addRange = () => {
+    if (state.ranges.length >= MAX_RANGES) return;
+    const id = nextRangeId(state.ranges);
+    setState((prev) => ({ ...prev, ranges: [...prev.ranges, emptyRange(id)] }));
+    setNewIds((prev) => new Set(prev).add(id));
+    focusIdRef.current = id;
+  };
+
+  const removeRange = useCallback(
+    (id: string) => {
+      const index = state.ranges.findIndex((r) => r.id === id);
+      if (index === -1 || state.ranges.length <= MIN_RANGES) return;
+      const removed = state.ranges[index];
+      setState((prev) => ({ ...prev, ranges: prev.ranges.filter((r) => r.id !== id) }));
+      showToast({
+        message: `Usunięto przedział ${index + 1}`,
+        action: {
+          label: "Cofnij",
+          onAction: () =>
+            setState((prev) => {
+              if (prev.ranges.length >= MAX_RANGES) return prev;
+              const ranges = [...prev.ranges];
+              const restoredId = ranges.some((r) => r.id === removed.id)
+                ? nextRangeId(ranges)
+                : removed.id;
+              ranges.splice(Math.min(index, ranges.length), 0, { ...removed, id: restoredId });
+              return { ...prev, ranges };
+            }),
+        },
+        duration: 6000,
+      });
+    },
+    [state.ranges, setState, showToast],
   );
 
   const onCurrencyChange = (code: string) => {
@@ -195,8 +245,11 @@ export function Calculator() {
         <RangesCard
           ranges={state.ranges}
           result={result}
+          newIds={newIds}
           onChange={updateRange}
           onClear={clearRange}
+          onRemove={removeRange}
+          onAdd={addRange}
         />
 
         <div className="flex min-w-0 flex-col gap-8 lg:sticky lg:top-6 lg:self-start">

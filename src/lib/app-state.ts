@@ -1,4 +1,4 @@
-import { RANGE_COUNT, type TimeRange } from "./time";
+import { MAX_RANGES, MIN_RANGES, RANGE_COUNT, type TimeRange } from "./time";
 import type { NbpRateResponse } from "./nbp-types";
 
 export const STORAGE_KEY = "odliczanie-godzin:v1";
@@ -20,13 +20,18 @@ export type AppState = {
   rateInfo: NbpRateResponse | null;
 };
 
-export function emptyRanges(): TimeRange[] {
-  return Array.from({ length: RANGE_COUNT }, (_, i) => ({
-    id: `r${i + 1}`,
-    start: "",
-    end: "",
-    active: true,
-  }));
+export function emptyRange(id: string): TimeRange {
+  return { id, start: "", end: "", active: true };
+}
+
+export function emptyRanges(count = RANGE_COUNT): TimeRange[] {
+  return Array.from({ length: count }, (_, i) => emptyRange(`r${i + 1}`));
+}
+
+/** Id for a newly added row that does not collide with existing ones. */
+export function nextRangeId(ranges: TimeRange[]): string {
+  const max = ranges.reduce((m, r) => Math.max(m, Number(r.id.slice(1)) || 0), 0);
+  return `r${max + 1}`;
 }
 
 export const INITIAL_STATE: AppState = {
@@ -46,8 +51,8 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const str = (v: unknown, fallback: string) => (typeof v === "string" ? v : fallback);
 
 function sanitizeRanges(raw: unknown): TimeRange[] {
-  const base = emptyRanges();
-  if (!Array.isArray(raw)) return base;
+  if (!Array.isArray(raw) || raw.length < MIN_RANGES) return emptyRanges();
+  const base = emptyRanges(Math.min(raw.length, MAX_RANGES));
   return base.map((def, i) => {
     const r = raw[i] as Partial<TimeRange> | undefined;
     if (!r || typeof r !== "object") return def;

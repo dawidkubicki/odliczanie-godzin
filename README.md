@@ -1,6 +1,6 @@
 # Odliczanie godzin
 
-Kalkulator czasu dla maksymalnie sześciu zakresów dat i godzin. Sumuje czas trwania (dni, godziny, minuty, a także łącznie w dniach jako liczbę dziesiętną) i przelicza wynik na kwotę według kursu średniego NBP.
+Kalkulator czasu dla wielu zakresów dat i godzin (domyślnie sześciu, maksymalnie dwudziestu). Sumuje czas trwania (dni, godziny, minuty, a także łącznie w dniach jako liczbę dziesiętną) i przelicza wynik na kwotę według kursu średniego NBP.
 
 ```
 kwota = łączny czas w dniach × kurs NBP × mnożnik × wartość
@@ -8,7 +8,7 @@ kwota = łączny czas w dniach × kurs NBP × mnożnik × wartość
 
 ## Funkcje
 
-- 6 zakresów czasowych, każdy z przełącznikiem „aktywny”; puste zakresy są pomijane
+- domyślnie 6 zakresów czasowych (można dodawać i usuwać, od 1 do 20), każdy z przełącznikiem „aktywny”; puste zakresy są pomijane
 - wyniki aktualizowane na bieżąco: dni / godziny / minuty, łącznie w dniach (5 miejsc po przecinku) i w godzinach
 - kursy średnie NBP (tabela A) dla dowolnej waluty: najnowszy albo z wybranego dnia (ostatni dzień roboczy w tym dniu lub przed nim)
 - ręczna korekta kursu, mnożnika i wartości (przecinek lub kropka)

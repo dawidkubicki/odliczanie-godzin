@@ -50,6 +50,15 @@ export function XmarkIcon(props: IconProps) {
   );
 }
 
+/** plus */
+export function PlusIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M12 5v14M5 12h14" />
+    </Svg>
+  );
+}
+
 /** chevron.up.chevron.down */
 export function ChevronUpDownIcon(props: IconProps) {
   return (
