@@ -1,0 +1,239 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — modelled on Apple's system colours.
+ * Raw values live on :root and are swapped for dark mode; Tailwind utilities
+ * (bg-canvas, text-label, border-separator, …) reference them via @theme inline.
+ */
+:root {
+  color-scheme: light dark;
+
+  --canvas: #f5f5f7;
+  --surface: #ffffff;
+  --field: rgba(118, 118, 128, 0.12);
+  --field-hover: rgba(118, 118, 128, 0.18);
+  --label: #1d1d1f;
+  --secondary: #6e6e73;
+  --tertiary: #8e8e93;
+  --separator: rgba(0, 0, 0, 0.08);
+  --accent: #0071e3;
+  --accent-hover: #0077ed;
+  --accent-soft: rgba(0, 113, 227, 0.1);
+  --success: #34c759;
+  --danger: #ff3b30;
+  --track-off: rgba(120, 120, 128, 0.16);
+  --thumb: #ffffff;
+  --segment-bg: rgba(118, 118, 128, 0.12);
+  --segment-thumb: #ffffff;
+  --hud: rgba(29, 29, 31, 0.86);
+  --hud-text: #f5f5f7;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 24px rgba(0, 0, 0, 0.04);
+  --focus: rgba(0, 113, 227, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #000000;
+    --surface: #1c1c1e;
+    --field: #2c2c2e;
+    --field-hover: #3a3a3c;
+    --label: #f5f5f7;
+    --secondary: #98989d;
+    --tertiary: #6e6e73;
+    --separator: rgba(255, 255, 255, 0.1);
+    --accent: #0a84ff;
+    --accent-hover: #409cff;
+    --accent-soft: rgba(10, 132, 255, 0.16);
+    --success: #30d158;
+    --danger: #ff453a;
+    --track-off: rgba(120, 120, 128, 0.32);
+    --thumb: #ffffff;
+    --segment-bg: rgba(118, 118, 128, 0.24);
+    --segment-thumb: #636366;
+    --hud: rgba(58, 58, 60, 0.9);
+    --hud-text: #f5f5f7;
+    --shadow-card: none;
+    --focus: rgba(10, 132, 255, 0.6);
+  }
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-field: var(--field);
+  --color-field-hover: var(--field-hover);
+  --color-label: var(--label);
+  --color-secondary: var(--secondary);
+  --color-tertiary: var(--tertiary);
+  --color-separator: var(--separator);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-track-off: var(--track-off);
+  --color-thumb: var(--thumb);
+  --color-segment: var(--segment-bg);
+  --color-segment-thumb: var(--segment-thumb);
+  --color-hud: var(--hud);
+  --color-hud-text: var(--hud-text);
+
+  --shadow-card: var(--shadow-card);
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Inter,
+    system-ui, sans-serif;
+
+  --ease-spring: cubic-bezier(0.32, 1.25, 0.6, 1);
+  --ease-apple: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  --animate-num-in: num-in 220ms var(--ease-apple);
+  --animate-hud-in: hud-in 260ms var(--ease-spring);
+  --animate-fade-in: fade-in 200ms var(--ease-apple);
+}
+
+@keyframes num-in {
+  from {
+    opacity: 0.35;
+    transform: translateY(0.12em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hud-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spinner-fade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.15;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--label);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@layer base {
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Inset text / date fields (iOS "tertiary fill" look) */
+  .field {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 36px;
+    border-radius: 10px;
+    background: var(--field);
+    color: var(--label);
+    padding: 7px 11px;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.005em;
+    border: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    transition:
+      background-color 160ms var(--ease-apple),
+      box-shadow 160ms var(--ease-apple);
+  }
+
+  .field:hover:not(:disabled) {
+    background: var(--field-hover);
+  }
+
+  .field:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus);
+  }
+
+  .field[aria-invalid="true"] {
+    box-shadow: inset 0 0 0 1px var(--danger);
+  }
+
+  .field::placeholder {
+    color: var(--tertiary);
+  }
+
+  /* datetime-local / date inputs */
+  .field::-webkit-date-and-time-value {
+    text-align: left;
+    margin: 0;
+  }
+
+  .field::-webkit-datetime-edit {
+    padding: 0;
+  }
+
+  .field::-webkit-calendar-picker-indicator {
+    opacity: 0.55;
+    cursor: pointer;
+    margin-left: 4px;
+    transition: opacity 150ms;
+  }
+
+  .field::-webkit-calendar-picker-indicator:hover {
+    opacity: 0.9;
+  }
+}
+
+/* Activity indicator (Apple-style spokes) */
+.spinner > span {
+  animation: spinner-fade 800ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .spinner > span {
+    animation: none !important;
+    opacity: 0.6;
+  }
+}
